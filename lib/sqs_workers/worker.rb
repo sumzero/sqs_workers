@@ -18,6 +18,7 @@ module SqsWorkers
         rescue StandardError => e
           logger.error("Error processing message #{msg.id} : #{e} : #{e.backtrace.join('\n')}")
         end
+        logger.debug("#{self.queue_name}: Finished with message: #{msg.id}")
       end
     end
 
