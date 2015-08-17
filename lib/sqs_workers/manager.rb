@@ -1,5 +1,7 @@
 module SqsWorkers
   class Manager
+    attr_reader :thread_list
+
     def initialize
       @thread_list = []
       @worker_classes = []
@@ -10,8 +12,12 @@ module SqsWorkers
       require_workers
 
       @worker_classes.each do |klass|
-        logger.info("Starting thread for #{klass}")
-        @thread_list << Thread.new { klass.new.run() }
+        if klass.method_defined? :perform
+          logger.info("Starting thread for #{klass}")
+          @thread_list << Thread.new { klass.new.run() }          
+        else
+          logger.info("Skipping #{klass} as perform() is not implemented...")
+        end
       end
 
       # Wait for all threads to finish before exiting

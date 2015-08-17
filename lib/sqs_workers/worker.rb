@@ -22,9 +22,10 @@ module SqsWorkers
       end
     end
 
-    def perform
-      raise "perform not implemented"
-    end
+    #checks to see if perform is implemented in child, if not, manager doesn't load worker (queueing only)
+    # def perform
+    #   raise "perform not implemented"
+    # end
 
     def duplicate?(msg)
       result = super(msg.md5)
