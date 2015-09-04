@@ -19,6 +19,7 @@ module SqsWorkers
     end
 
     def self.perform_async(params)
+      params[:timestamp] = DateTime.now #to foil duplicate testing for different messages with same parameters
       @cached_worker = self.new if @cached_worker.nil?
       @cached_worker.enqueue(params)
     end
