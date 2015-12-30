@@ -1,3 +1,5 @@
+require 'logger'
+
 module SqsWorkers
   class Manager
     attr_reader :thread_list
@@ -31,7 +33,7 @@ module SqsWorkers
 
     def logger
       return @logger if @logger
-      @logger = Logger.new(STDOUT)
+      @logger = ::Logger.new(STDOUT)
       STDOUT.sync = true
       @logger
     end

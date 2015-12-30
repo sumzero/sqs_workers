@@ -3,13 +3,15 @@ require 'sqs_workers/spec/test_worker'
 
 describe SqsWorkers::Runner, :sqs do
 	#connects to fake sqs server provided by the gem
-	let!(:aws_config) { { use_ssl: false, sqs_endpoint: "localhost", sqs_port: 12345, access_key_id: "fake access key", secret_access_key:  "fake secret key"} }
+	let!(:aws_config) { { region: 'us-east-1', endpoint: $fake_sqs.uri, credentials: Aws::Credentials.new("fake", "fake") } }
 
 	it "queues an item and picks the item off of the queue" do
 		Redis.new.flushall
 		File.delete('out.txt') if File.exist?('out.txt')
-		AWS.config(aws_config)
-		AWS::SQS.new.queues.create("test_test")
+		Aws.config.update(aws_config)
+		sqs = Aws::SQS::Client.new
+		#sqs.config.endpoint = $fake_sqs.uri
+		sqs.create_queue(queue_name: "test_test")
 
 		SqsWorkers.configure do |config|
 			config[:aws_config] = aws_config

@@ -4,6 +4,7 @@ gem 'fake_sqs'
 gem 'rspec'
 
 gem 'redis'
-gem 'aws-sdk', '< 2.0'
+gem 'aws-sdk'
 gem 'fallen'
 gem 'byebug'
+gem 'logger'
