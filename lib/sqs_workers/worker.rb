@@ -43,6 +43,7 @@ module SqsWorkers
     end
 
     def poller
+      Aws.config.update(SqsWorkers.config[:aws_config])
       @poller ||= Aws::SQS::QueuePoller.new(queue_url)
     end
   end
