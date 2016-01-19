@@ -16,7 +16,10 @@ module SqsWorkers
       @worker_classes.each do |klass|
         if klass.method_defined? :perform
           logger.info("Starting thread for #{klass}")
-          @thread_list << Thread.new { klass.new.run() }          
+          @thread_list << Thread.new do
+            logger.info("Started thread: #{Thread.current.inspect} for #{klass}")
+            klass.new.run()
+          end
         else
           logger.info("Skipping #{klass} as perform() is not implemented...")
         end
@@ -24,7 +27,7 @@ module SqsWorkers
 
       # Wait for all threads to finish before exiting
       @thread_list.each(&:join)
-      logger.info("Waiting")
+      logger.info("All threads exited....")
     end
 
     def stop
