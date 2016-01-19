@@ -20,15 +20,20 @@ describe SqsWorkers::Runner, :sqs do
 			#local redis server by default
 		end
 
+		Thread.new { SqsWorkers::Runner.run }
+
 		TestWorker.perform_async({test: "test"}) 
 
-		Thread.new { SqsWorkers::Runner.start! }
+		wait_for(3, 0.05) { File.exist?('out.txt') }
 
 		#let the magic happen
-		sleep 0.5
 
 		expect(File.exist?('out.txt')).to eq(true)
 
 		File.delete('out.txt') if File.exist?('out.txt')
+	end
+
+	def wait_for(time_to_wait, wait_interval)
+		Timeout.timeout(time_to_wait) { sleep wait_interval until yield }
 	end
 end
