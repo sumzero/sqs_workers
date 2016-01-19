@@ -6,7 +6,7 @@ require_relative  'sqs_workers/version'
 
 module SqsWorkers
 	def self.config
-		@config ||= { aws_config: {}, worker_root: ".", queue_prefix: "", redis_config: {}}
+		@config ||= { worker_root: ".", queue_prefix: "", redis_config: {}}
 	end
 
 	def self.configure

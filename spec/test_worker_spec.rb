@@ -14,7 +14,6 @@ describe SqsWorkers::Runner, :sqs do
 		sqs.create_queue(queue_name: "test_test")
 
 		SqsWorkers.configure do |config|
-			config[:aws_config] = aws_config
 			config[:worker_root] = "#{Dir.pwd}/lib/sqs_workers/spec/"
 			config[:queue_prefix] = "test"
 			#local redis server by default
