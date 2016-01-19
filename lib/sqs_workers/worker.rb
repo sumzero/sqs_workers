@@ -51,6 +51,7 @@ module SqsWorkers
     end
 
     def queue_url
+      logger.debug("#{self.queue_name}: getting_queue_url: #{@queue_url}")
       @queue_url ||= sqs_client.get_queue_url(queue_name: self.queue_name).queue_url
     end
 
