@@ -9,7 +9,8 @@ module SqsWorkers
     def run
       logger.info("#{self.queue_name}: Starting polling for: #{self.queue_name}")
 
-      poller.poll do |msg|
+      poller.poll do |msg, stats|
+        print_queue_stats(stats)
         logger.debug("#{self.queue_name}: Received message: #{msg.message_id} : #{msg.body}")
         next if duplicate?(msg)
         logger.debug("#{self.queue_name}: Processing message: #{msg.message_id}")
@@ -18,9 +19,20 @@ module SqsWorkers
           perform(decode_message(msg.body))
         rescue StandardError => e
           logger.error("Error processing message #{msg.message_id} : #{e} : #{e.backtrace.join('\n')}")
+        rescue Exception => e
+          logger.error("Exception: #{e} : #{e.backtrace.join('\n')}")
+        ensure
+          logger.debug("#{self.queue_name}: Finished with message: #{msg.message_id}")
         end
-        logger.debug("#{self.queue_name}: Finished with message: #{msg.message_id}")
       end
+
+      logger.debug("#{self.queue_name}: Exited poller.poll()")
+    end
+
+    def print_queue_stats(stats)
+      logger.debug("#{self.queue_name}: Requests: #{stats.request_count}")
+      logger.debug("#{self.queue_name}: Messages: #{stats.received_message_count}")
+      logger.debug("#{self.queue_name}: Last-timestamp: #{stats.last_message_received_at}")
     end
 
     #checks to see if perform is implemented in child, if not, manager doesn't load worker (queueing only)
