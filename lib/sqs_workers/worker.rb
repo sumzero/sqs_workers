@@ -2,6 +2,8 @@ require 'aws-sdk'
 
 module SqsWorkers
   class Worker < WorkerBase
+    @@mutex = Mutex.new
+
     def enqueue(options)
       sqs_client.send_message(queue_url: queue_url, message_body: encode_message(options))
     end
@@ -47,12 +49,13 @@ module SqsWorkers
     end
 
     def sqs_client
-      @sqs_client ||= Aws::SQS::Client.new
+      @@mutex.synchronize do
+        @sqs_client ||= Aws::SQS::Client.new
+      end
     end
 
     def queue_url
-      logger.debug("#{self.queue_name}: getting_queue_url: #{@queue_url}")
-      @queue_url ||= sqs_client.get_queue_url(queue_name: self.queue_name).queue_url
+        @queue_url ||= sqs_client.get_queue_url(queue_name: self.queue_name).queue_url
     end
 
     def poller
