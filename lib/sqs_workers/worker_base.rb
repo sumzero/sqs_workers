@@ -1,4 +1,5 @@
 require 'redis'
+require 'base64'
 
 module SqsWorkers
   class WorkerBase
@@ -52,7 +53,16 @@ module SqsWorkers
 
     def decode_message(message)
       #Hash[JSON.parse(message).map{ |k, v| [k.to_sym, v] }]
-      JSON.parse(message, symbolize_names: true)
+      JSON.parse(decode_base_64(message), symbolize_names: true)
+    end
+
+    def decode_base_64(message)
+      #http://stackoverflow.com/questions/8571501/how-to-check-whether-the-string-is-base64-encoded-or-not
+      if message.match(/^([A-Za-z0-9+\/]{4})*([A-Za-z0-9+\/]{4}|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}==)$/)
+        Base64.decode64(message)
+      else
+        message
+      end
     end
 
     def logger
