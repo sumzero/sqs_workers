@@ -18,10 +18,10 @@ class GruntWorker < SqsWorkers::Worker
 
 	def perform(msg)
 		ActiveRecord::Base.connection_pool.with_connection do |conn|
-      grunt = Grunt.find(msg[:id])
-      puts "Grunt id: #{msg[:id]}. Your command, master."
-      grunt.zug_zug()
-      puts "Zug Zug"
+      			grunt = Grunt.find(msg[:id])
+      			puts "Grunt id: #{msg[:id]}. Your command, master."
+      			grunt.zug_zug()
+      			puts "Zug Zug"
 		end
 	end
 end
