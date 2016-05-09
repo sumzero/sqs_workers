@@ -1,5 +1,4 @@
-Note: in the time since this gem was originally developed, new and better solutions exist which work with ActiveJob. Check out: https://github.com/phstc/shoryuken
-
+Note: in the time since this gem was originally developed, new and better solutions have been developed that are compatible with ActiveJob. Check out: https://github.com/phstc/shoryuken
 
 # sqs_workers
 
