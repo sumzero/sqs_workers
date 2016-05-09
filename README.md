@@ -2,12 +2,6 @@
 
 This gem provides a convenient framework for working with SQS queues in Rails. 
 
-To publish messages:
-
-```ruby
-  GruntWorker.perform_async({id: 1})
-```
-
 To consume messages:
 
 ```ruby
@@ -25,6 +19,12 @@ class GruntWorker < SqsWorkers::Worker
 		end
 	end
 end
+```
+
+To publish messages:
+
+```ruby
+  GruntWorker.perform_async({id: 1})
 ```
 
 Environments:
