@@ -60,7 +60,7 @@ module SqsWorkers
     end
 
     def sqs_client
-      @sqs_client ||= Aws::SQS::Client.new
+      @sqs_client ||= Aws::SQS::Client.new(SqsWorkers.config[:aws_config][:region])
     end
 
     def queue_url
