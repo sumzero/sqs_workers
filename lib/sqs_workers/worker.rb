@@ -4,7 +4,11 @@ module SqsWorkers
   class Worker < WorkerBase
 
     def enqueue(options)
-      sqs_client.send_message(queue_url: queue_url, message_body: encode_message(options))
+      if self.sns_arn
+        sns_topic.publish(message: encode_message(options))
+      else
+        sqs_client.send_message(queue_url: queue_url, message_body: encode_message(options))
+      end
     end
 
     def run
@@ -45,6 +49,14 @@ module SqsWorkers
       result = super(msg.md5_of_body)
       logger.debug("#{self.queue_name}: message is dupe #{msg.message_id}") if result
       result
+    end
+
+    def sns
+      @sns = Aws::SNS::Resource.new
+    end
+
+    def sns_topic
+      @sns_topic ||= sns.topic(self.sns_arn)
     end
 
     def sqs_client

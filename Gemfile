@@ -1,7 +1,9 @@
 source 'https://rubygems.org'
 
-gem 'fake_sqs'
-gem 'rspec'
+group :test do
+  gem 'fake_sqs'
+  gem 'rspec'
+end
 
 gem 'redis'
 gem 'aws-sdk'

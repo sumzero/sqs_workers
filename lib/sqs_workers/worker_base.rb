@@ -7,8 +7,25 @@ module SqsWorkers
       @queue_name = name.to_s
     end
 
+    def self.fifo(fifo=false)
+      @fifo = fifo
+    end
+
+    #arn:aws:sns:us-west-2:123456789:MyGroovyTopic
+    def self.sns(sns_arn)
+      @sns_arn = sns_arn.to_s
+    end
+
     def self.queue_name
-      SqsWorkers.config[:queue_prefix] + "_" + @queue_name
+      SqsWorkers.config[:queue_prefix] + "_" + @queue_name + (@fifo ? ".fifo" : "")
+    end
+
+    def self.sns_arn
+      @sns_arn
+    end
+
+    def sns_arn
+      self.class.sns_arn
     end
 
     def queue_name
@@ -20,7 +37,7 @@ module SqsWorkers
     end
 
     def self.perform_async(params)
-      params[:timestamp] = DateTime.now #to foil duplicate testing for different messages with same parameters
+      params[:timestamp] = Time.now #to foil duplicate testing for different messages with same parameters
       @cached_worker = self.new if @cached_worker.nil?
       @cached_worker.enqueue(params)
     end
