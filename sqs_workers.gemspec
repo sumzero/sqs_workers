@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
 	s.files = Dir.glob("{lib,spec}/**/*") + %w(README.md)
 
 	#technically, depends on rails, but will refactor this out in the future
-	s.add_runtime_dependency('aws-sdk', '~> 2.0')
+	s.add_runtime_dependency('aws-sdk', '> 2.10')
 	s.add_runtime_dependency('redis', '~> 3.2')
 	s.add_runtime_dependency('fallen', '~> 0')
 end

@@ -8,7 +8,7 @@ module SqsWorkers
     end
 
     def self.fifo(fifo=false)
-      @fifo = fifo
+      @is_fifo = fifo
     end
 
     #arn:aws:sns:us-west-2:123456789:MyGroovyTopic
@@ -17,7 +17,7 @@ module SqsWorkers
     end
 
     def self.queue_name
-      SqsWorkers.config[:queue_prefix] + "_" + @queue_name + (@fifo ? ".fifo" : "")
+      SqsWorkers.config[:queue_prefix] + "_" + @queue_name + (self.is_fifo ? ".fifo" : "")
     end
 
     def self.sns_arn
@@ -26,6 +26,14 @@ module SqsWorkers
 
     def sns_arn
       self.class.sns_arn
+    end
+
+    def self.is_fifo
+      @is_fifo
+    end
+
+    def is_fifo
+      self.class.is_fifo
     end
 
     def queue_name

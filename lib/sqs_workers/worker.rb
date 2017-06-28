@@ -6,8 +6,12 @@ module SqsWorkers
     def enqueue(options)
       if self.sns_arn
         sns_topic.publish(message: encode_message(options))
+      elsif self.is_fifo
+        encoded_body = encode_message(options)
+        key = (Digest::MD5.new << encoded_body).to_s
+        queue.send_message({queue_url: queue_url, message_body: encoded_body, message_deduplication_id: key , message_group_id: key })
       else
-        sqs_client.send_message(queue_url: queue_url, message_body: encode_message(options))
+        queue.send_message({queue_url: queue_url, message_body: encode_message(options)})
       end
     end
 
@@ -63,8 +67,12 @@ module SqsWorkers
       @sqs_client ||= Aws::SQS::Client.new(SqsWorkers.config[:aws_config])
     end
 
+    def queue
+      @queue = Aws::SQS::Queue.new(self.queue_url)
+    end
+
     def queue_url
-        @queue_url ||= sqs_client.get_queue_url(queue_name: self.queue_name).queue_url
+      @queue_url ||= sqs_client.get_queue_url(queue_name: self.queue_name).queue_url
     end
 
     def poller
