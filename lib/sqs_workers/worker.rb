@@ -52,7 +52,7 @@ module SqsWorkers
     end
 
     def sns
-      @sns = Aws::SNS::Resource.new
+      @sns = Aws::SNS::Resource.new(SqsWorkers.config[:aws_config][:region])
     end
 
     def sns_topic
