@@ -52,7 +52,7 @@ module SqsWorkers
     end
 
     def sns
-      @sns = Aws::SNS::Resource.new(SqsWorkers.config[:aws_config][:region])
+      @sns = Aws::SNS::Resource.new(SqsWorkers.config[:aws_config])
     end
 
     def sns_topic
@@ -60,7 +60,7 @@ module SqsWorkers
     end
 
     def sqs_client
-      @sqs_client ||= Aws::SQS::Client.new(SqsWorkers.config[:aws_config][:region])
+      @sqs_client ||= Aws::SQS::Client.new(SqsWorkers.config[:aws_config])
     end
 
     def queue_url
