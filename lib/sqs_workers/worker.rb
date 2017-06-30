@@ -68,7 +68,7 @@ module SqsWorkers
     end
 
     def queue
-      @queue = Aws::SQS::Queue.new(self.queue_url)
+      @queue = Aws::SQS::Queue.new(self.queue_url, SqsWorkers.config[:aws_config])
     end
 
     def queue_url
