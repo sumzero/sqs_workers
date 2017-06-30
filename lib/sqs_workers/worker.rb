@@ -64,7 +64,7 @@ module SqsWorkers
     end
 
     def sqs_client
-      @sqs_client ||= Aws::SQS::Client.new(SqsWorkers.config[:aws_config])
+      @sqs_client ||= Aws::SQS::Client.new(SqsWorkers.config[:aws_config] || {})
     end
 
     def queue

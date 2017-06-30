@@ -3,77 +3,88 @@ require 'sqs_workers/spec/test_worker'
 require 'sqs_workers/spec/test_fifo_worker'
 require 'sqs_workers/spec/test_sns_worker'
 
-describe SqsWorkers::Runner, :sqs do
+describe SqsWorkers::Runner do
+
+	context "with_fake_sqs", :sqs do
 	#connects to fake sqs server provided by the gem
-	let!(:aws_config) { { region: 'us-east-1', endpoint: $fake_sqs.uri, credentials: Aws::Credentials.new("fake", "fake") } }
+		let!(:aws_config) { { region: 'us-east-1', endpoint: $fake_sqs.uri, credentials: Aws::Credentials.new("fake", "fake") } }
 
-	it "queues an item and picks the item off of the queue" do
-		Redis.new.flushall
-		File.delete('out.txt') if File.exist?('out.txt')
-		Aws.config.update(aws_config)
-		sqs = Aws::SQS::Client.new
-		#sqs.config.endpoint = $fake_sqs.uri
-		sqs.create_queue(queue_name: "test_test")
+		it "queues an item and picks the item off of the queue" do
+			Redis.new.flushall
+			File.delete('out.txt') if File.exist?('out.txt')
+			Aws.config.update(aws_config)
+			sqs = Aws::SQS::Client.new
+			#sqs.config.endpoint = $fake_sqs.uri
+			sqs.create_queue(queue_name: "test_test")
 
-		SqsWorkers.configure do |config|
-			config[:worker_root] = "#{Dir.pwd}/lib/sqs_workers/spec/"
-			config[:queue_prefix] = "test"
-			#local redis server by default
+			SqsWorkers.configure do |config|
+				config[:worker_root] = "#{Dir.pwd}/lib/sqs_workers/spec/"
+				config[:queue_prefix] = "test"
+				#local redis server by default
+			end
+
+			Thread.new { SqsWorkers::Runner.run }
+
+			TestWorker.perform_async({test: "test"}) 
+
+			wait_for(3, 0.05) { File.exist?('out.txt') }
+
+			#let the magic happen
+
+			expect(File.exist?('out.txt')).to eq(true)
+
+			File.delete('out.txt') if File.exist?('out.txt')
 		end
 
-		Thread.new { SqsWorkers::Runner.run }
+		it "queues into a fifo" do
+			Redis.new.flushall
+			File.delete('out.txt') if File.exist?('out.txt')
+			Aws.config.update(aws_config)
+			sqs = Aws::SQS::Client.new
 
-		TestWorker.perform_async({test: "test"}) 
+			sqs.create_queue(queue_name: "test_test.fifo")
 
-		wait_for(3, 0.05) { File.exist?('out.txt') }
+			SqsWorkers.configure do |config|
+				config[:worker_root] = "#{Dir.pwd}/lib/sqs_workers/spec/"
+				config[:queue_prefix] = "test"
+				#local redis server by default
+			end
 
-		#let the magic happen
+			Thread.new { SqsWorkers::Runner.run }
 
-		expect(File.exist?('out.txt')).to eq(true)
+			TestFifoWorker.perform_async({test: "test"})
 
-		File.delete('out.txt') if File.exist?('out.txt')
-	end
+			wait_for(3, 0.05) { File.exist?('out.txt') }
 
-	it "queues into a fifo" do
-		Redis.new.flushall
-		File.delete('out.txt') if File.exist?('out.txt')
-		Aws.config.update(aws_config)
-		sqs = Aws::SQS::Client.new
+			#let the magic happen
 
-		sqs.create_queue(queue_name: "test_test.fifo")
+			expect(File.exist?('out.txt')).to eq(true)
 
-		SqsWorkers.configure do |config|
-			config[:worker_root] = "#{Dir.pwd}/lib/sqs_workers/spec/"
-			config[:queue_prefix] = "test"
-			#local redis server by default
+			File.delete('out.txt') if File.exist?('out.txt')
 		end
-
-		Thread.new { SqsWorkers::Runner.run }
-
-		TestFifoWorker.perform_async({test: "test"})
-
-		wait_for(3, 0.05) { File.exist?('out.txt') }
-
-		#let the magic happen
-
-		expect(File.exist?('out.txt')).to eq(true)
-
-		File.delete('out.txt') if File.exist?('out.txt')
 	end
 
 	# it "queues into sns" do
+	# 	aws_config = { region: 'us-east-1' }
  #    Aws.config.update(aws_config)
 
- #    sqs = Aws::SQS::Client.new
-	# 	sqs.create_queue(queue_name: "test_sns")
+ #    #sqs = Aws::SQS::Client.new
+	# 	#sqs.create_queue(queue_name: "dev_pricing_event")
 
 	# 	SqsWorkers.configure do |config|
 	# 		config[:worker_root] = "#{Dir.pwd}/lib/sqs_workers/spec/"
 	# 		config[:queue_prefix] = "test"
+	# 		config[:aws_config] = aws_config
 	# 		#local redis server by default
 	# 	end
 
- #    TestSnsWorker.perform_async({test: true})
+	# 	Thread.new { SqsWorkers::Runner.run }
+
+ #    TestWorker.perform_async({test: true})
+
+ #    wait_for(3, 0.05) { File.exist?('out.txt') }
+
+ #    File.delete('out.txt') if File.exist?('out.txt')
 	# end
 
 	def wait_for(time_to_wait, wait_interval)
