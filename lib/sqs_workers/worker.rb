@@ -76,7 +76,7 @@ module SqsWorkers
     end
 
     def poller
-      @poller ||= Aws::SQS::QueuePoller.new(queue_url)
+      @poller ||= Aws::SQS::QueuePoller.new(queue_url, client: sqs_client)
     end
   end
 end
