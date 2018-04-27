@@ -72,7 +72,11 @@ module SqsWorkers
     end
 
     def queue_url
-      @queue_url ||= sqs_client.get_queue_url(queue_name: self.queue_name).queue_url
+      begin
+        @queue_url ||= sqs_client.get_queue_url(queue_name: self.queue_name).queue_url
+      rescue Aws::SQS::Errors::NonExistentQueue
+        logger.error("#{self.queue_name}: Queue not found.")
+      end
     end
 
     def poller

@@ -36,12 +36,14 @@ module SqsWorkers
       puts "process dead"
     end
 
+    #callback when starting
     def self.run
       puts "starting"
       @manager = SqsWorkers::Manager.new
       @manager.run
     end
 
+    #callback when stopping (called from the INT or TERM interrupt)
     def self.stop
       puts "stopping"
       @manager.stop if @manager
