@@ -53,7 +53,7 @@ module SqsWorkers
     # Check to see if a task is duplicate
     def duplicate?(msg_hash)
       if @no_redis
-        logger.error("#{self.queue_name}: Could not connect to redis, not checking for duplicate")
+        logger.warn("#{self.queue_name}: Could not connect to redis, not checking for duplicate. Ignore if you are using FIFO queues and don't need to check for duplicates")
       end
       key_name = self.queue_name + ":" + msg_hash
       could_set = redis_client.setnx(key_name, "1")
@@ -64,12 +64,8 @@ module SqsWorkers
 
       return false
     rescue Redis::CannotConnectError => e
-      if Rails.env.production?
-        raise e
-      else
-        @no_redis = true
-        return false
-      end
+      @no_redis = true
+      return false
     end
 
     def encode_message(message)
